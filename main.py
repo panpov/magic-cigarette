@@ -3,7 +3,7 @@
 # last modified: 04/25/2026
 # desc: smoke a magic cigarette to destroy your lungs!
 # license: MIT
-# version: 1.1
+# version: 1.1.1
 
 import pyxel
 import time
@@ -203,22 +203,28 @@ class Player:
     def controls(self):
         """Controls for the magic cigarette (the player)"""
         # shoot smoke if player has charged up at least 1 point of power
-        if pyxel.btnr(pyxel.KEY_SPACE) and self.power != 0:
+        if (pyxel.btnr(pyxel.KEY_SPACE) or
+            pyxel.btnr(pyxel.GAMEPAD1_BUTTON_A)) \
+            and self.power != 0:
             self.shoot()
-        elif pyxel.btn(pyxel.KEY_SPACE):
+        elif (pyxel.btn(pyxel.KEY_SPACE) or
+            pyxel.btn(pyxel.GAMEPAD1_BUTTON_A)):
             self.smoke()
         else:
             self.cooldown()
         
         # update location/direction of arrow depending direction of movement
-        if pyxel.btn(pyxel.KEY_UP):
+        if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
             self.dir = 0
             self.arrow_x_offset = ARROW_U_OFFSET
-        if pyxel.btn(pyxel.KEY_LEFT) and self.x > 0:
+        if (pyxel.btn(pyxel.KEY_LEFT) or
+            pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT)) and self.x > 0:
             self.x -= PLYR_SPD
             self.dir = -1
             self.arrow_x_offset = ARROW_L_OFFSET
-        if pyxel.btn(pyxel.KEY_RIGHT) and self.x < pyxel.width - (PLYR_W - self.charge):
+        if (pyxel.btn(pyxel.KEY_RIGHT) or
+            pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT)) \
+        and self.x < pyxel.width - (PLYR_W - self.charge):
             self.x += PLYR_SPD
             self.dir = 1
             self.arrow_x_offset = 0
@@ -253,6 +259,15 @@ class Game:
     def __init__(self):
         pyxel.init(SCRN_W, SCRN_H, title=TITLE, fps=FPS)
         pyxel.load("resources.pyxres")
+        
+        icon_data = []
+        for y in range(128, 144):
+            row = ""
+            for x in range(16):
+                color = pyxel.images[0].pget(x, y)
+                row += f"{color:X}"
+            icon_data.append(row)
+        pyxel.icon(icon_data, 4, 0)
         
         self.player = Player(INIT_X, INIT_Y)
         self.start = True
@@ -293,16 +308,16 @@ class Game:
     def update(self):
         """Main gameplay updater"""
         if self.start:
-            if pyxel.btnr(pyxel.KEY_SPACE):
+            if pyxel.btnr(pyxel.KEY_SPACE) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_A):
                 pyxel.play(1, SND_START)
                 self.start = False
         elif self.tut:
-            if pyxel.btnr(pyxel.KEY_SPACE):
+            if pyxel.btnr(pyxel.KEY_SPACE) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_A):
                 pyxel.play(1, SND_START)
                 self.tut = False
                 self.start_time = time.time()
         elif self.restart:
-            if pyxel.btnr(pyxel.KEY_SPACE):
+            if pyxel.btnr(pyxel.KEY_SPACE) or pyxel.btnr(pyxel.GAMEPAD1_BUTTON_A):
                 pyxel.play(1, SND_START)
                 self.restart_game()
         else:
